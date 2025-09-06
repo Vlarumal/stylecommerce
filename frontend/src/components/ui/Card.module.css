@@ -1,0 +1,63 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  max-width: 100%;
+  position: relative;
+  border: 1px solid #e0e0e0;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.card:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  border-color: #007bff;
+}
+
+.card:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  border-color: #007bff;
+}
+
+.card:focus-within {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  border-color: #007bff;
+}
+
+/* Responsive sizing */
+@media (min-width: 768px) {
+  .card {
+    max-width: 300px;
+  }
+}
+
+/* Card variants */
+.card.interactive {
+  cursor: pointer;
+}
+
+.card.interactive:hover {
+  cursor: pointer;
+}
+
+/* Card content spacing */
+.card > *:first-child {
+  margin-top: 0;
+}
+
+.card > *:last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,28 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=your_database_name;Username=your_username;Password=your_password"
+  },
+  "JwtSettings": {
+      "Secret": "your-super-secret-key-that-should-be-at-least-32-characters-long-and-secure",
+      "Issuer": "YourApp.Api",
+      "Audience": "YourApp.Api.Users",
+      "ExpiryMinutes": 30
+  },
+  "SecuritySettings": {
+      "AllowedCorsOrigins": [
+          "http://localhost:5173",
+          "https://localhost:5173"
+      ]
+  },
+  "StripeSettings": {
+      "SecretKey": "sk_test_your_test_stripe_secret_key",
+      "PublishableKey": "pk_test_your_test_stripe_publishable_key"
+  }
+}
