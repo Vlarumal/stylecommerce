@@ -35,12 +35,12 @@ namespace StyleCommerce.Api.Middleware
             // Enhanced Content-Security-Policy with development-friendly settings
             var csp =
                 "default-src 'self'; "
-                + $"script-src 'self' 'unsafe-inline' {allowedOrigin} https://js.stripe.com https://m.stripe.network https://gc.kis.v2.scr.kaspersky-labs.com; "
-                + $"style-src 'self' 'unsafe-inline' {allowedOrigin} https://m.stripe.network https://js.stripe.com https://gc.kis.v2.scr.kaspersky-labs.com; "
+                + $"script-src 'self' 'unsafe-inline' {allowedOrigin} https://js.stripe.com https://m.stripe.network https://gc.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
+                + $"style-src 'self' 'unsafe-inline' {allowedOrigin} https://m.stripe.network https://js.stripe.com https://gc.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
                 + "img-src 'self' data: https:; "
                 + "font-src 'self' data:; "
                 // Allow all localhost connections during development
-                + $"connect-src 'self' {allowedOrigin} http://localhost:* ws://localhost:* https://api.stripe.com https://r.stripe.com https://merchant-ui-api.stripe.com https://*.stripe.com https://cdn.segment.com wss://gc.kis.v2.scr.kaspersky-labs.com; "
+                + $"connect-src 'self' {allowedOrigin} http://localhost:* ws://localhost:* https://api.stripe.com https://r.stripe.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com https://merchant-ui-api.stripe.com https://*.stripe.com https://cdn.segment.com wss://gc.kis.v2.scr.kaspersky-labs.com; "
                 + "frame-ancestors 'none'; "
                 + "form-action 'self'; "
                 + "base-uri 'self'; "
