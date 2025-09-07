@@ -86,7 +86,16 @@ builder.Services.AddCors(options =>
                 .WithOrigins(
                     builder
                         .Configuration.GetSection("SecuritySettings:AllowedCorsOrigins")
-                        .Get<string[]>() ?? new string[] { "http://localhost:5173" }
+                        .Get<string[]>()
+                        ?? new string[]
+                        {
+                            "https://stylecommerce-7o47.onrender.com",
+                            "https://stylecommerce.onrender.com",
+                            "http://localhost:5173",
+                            "https://localhost:5173",
+                            "https://localhost:4173",
+                            "http://localhost:4173",
+                        }
                 )
                 .AllowAnyMethod()
                 .AllowAnyHeader()

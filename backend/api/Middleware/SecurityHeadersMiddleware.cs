@@ -22,8 +22,18 @@ namespace StyleCommerce.Api.Middleware
             var allowedOrigins = _securitySettings.AllowedCorsOrigins ?? new string[0];
             var allowedOrigin =
                 allowedOrigins.Length > 0
-                    ? string.Join(" ", allowedOrigins)
-                    : "http://localhost:5173";
+                    ? string.Join(
+                        " ",
+                        allowedOrigins,
+                        "https://stylecommerce-7o47.onrender.com",
+                        "https://stylecommerce.onrender.com"
+                    )
+                    : string.Join(
+                        " ",
+                        "https://stylecommerce-7o47.onrender.com",
+                        "https://stylecommerce.onrender.com",
+                        "http://localhost:5173"
+                    );
 
             // Security headers based on best practices
             context.Response.Headers["X-Frame-Options"] = "DENY";
@@ -35,8 +45,8 @@ namespace StyleCommerce.Api.Middleware
             // Enhanced Content-Security-Policy with development-friendly settings
             var csp =
                 "default-src 'self'; "
-                + $"script-src 'self' 'unsafe-inline' {allowedOrigin} https://js.stripe.com https://m.stripe.network https://gc.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
-                + $"style-src 'self' 'unsafe-inline' {allowedOrigin} https://m.stripe.network https://js.stripe.com https://gc.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
+                + $"script-src 'self' 'unsafe-inline' {allowedOrigin} https://js.stripe.com https://m.stripe.network https://gc.kis.v2.scr.kaspersky-labs.com https://ff.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
+                + $"style-src 'self' 'unsafe-inline' {allowedOrigin} https://m.stripe.network https://js.stripe.com https://gc.kis.v2.scr.kaspersky-labs.com https://ff.kis.v2.scr.kaspersky-labs.com https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com; "
                 + "img-src 'self' data: https:; "
                 + "font-src 'self' data:; "
                 // Allow all localhost connections during development
