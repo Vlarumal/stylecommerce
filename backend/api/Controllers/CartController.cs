@@ -49,7 +49,7 @@ namespace StyleCommerce.Api.Controllers
                             HttpOnly = true,
                             Secure = true,
                             IsEssential = true,
-                            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+                            SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
                         }
                     );
                 }
@@ -123,7 +123,7 @@ namespace StyleCommerce.Api.Controllers
                         HttpOnly = true,
                         Secure = true,
                         IsEssential = true,
-                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
                     }
                 );
             }
@@ -208,7 +208,7 @@ namespace StyleCommerce.Api.Controllers
                         HttpOnly = true,
                         Secure = true,
                         IsEssential = true,
-                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
                     }
                 );
             }
@@ -280,7 +280,7 @@ namespace StyleCommerce.Api.Controllers
                         HttpOnly = true,
                         Secure = true,
                         IsEssential = true,
-                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+                        SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
                     }
                 );
             }
@@ -357,7 +357,7 @@ namespace StyleCommerce.Api.Controllers
                     HttpOnly = true,
                     Secure = true,
                     IsEssential = true,
-                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict,
+                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None,
                 }
             );
 
