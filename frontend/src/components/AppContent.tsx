@@ -6,12 +6,11 @@ import {
   Layout,
   Row,
   Col,
-  Card,
   Divider,
   Space,
 } from 'antd';
 import React, { useState } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { AppTheme } from '../types/theme';
 
@@ -19,18 +18,21 @@ import OrderManagementPage from './admin/OrderManagementPage';
 import AuthRedirectWrapper from './AuthRedirectWrapper';
 import CartPage from './CartPage';
 import CheckoutPage from './CheckoutPage';
+import LoginPageContent from './LoginPageContent';
+import type { RedirectState } from './LoginPageContent';
 import OrderConfirmationPage from './OrderConfirmationPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import OrderHistoryPage from './OrderHistoryPage';
 import ProductDetail from './ProductDetail';
 import ProductList from './ProductList';
+import RegistrationPageContent from './RegistrationPageContent';
 
 const { Content } = Layout;
 
 interface AppContentProps {
   isLoggedIn: boolean;
   theme: AppTheme;
-  handleLogin: (values: { username: string; password: string }) => void;
+  handleLogin: (values: { username: string; password: string }, locationState?: RedirectState) => void;
 }
 
 interface Category {
@@ -45,94 +47,6 @@ const categories: Category[] = [
   { id: 3, name: 'Accessories' },
 ];
 
-// Separate component for login page content (AppContent-specific implementation)
-// Note: This is a simplified version compared to the standalone LoginPageContent component
-// The standalone version has more features like error handling with message service and better integration with AuthService
-const LoginPageContent: React.FC<{
-  theme: AppTheme;
-  handleLogin: (values: { username: string; password: string }) => void;
-}> = ({ theme, handleLogin }) => {
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = (values: { username: string; password: string }) => {
-    try {
-      // This will be passed from the parent component in a real implementation
-      handleLogin(values);
-      setError(null);
-    } catch {
-      setError('Invalid username or password');
-    }
-  };
-
-  return (
-    <Card>
-      <h2
-        style={{
-          textAlign: 'center',
-          marginBottom: '1.5rem',
-        }}
-      >
-        Login
-      </h2>
-      {error && (
-        <div
-          style={{
-            color: theme.token?.colorError,
-            backgroundColor: '#f8d7da',
-            border: '1px solid #f5c6cb',
-            padding: '0.75rem',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-          }}
-        >
-          {error}
-        </div>
-      )}
-      <Form
-        onFinish={handleSubmit}
-        layout='vertical'
-      >
-        <Form.Item
-          label='Username'
-          name='username'
-          rules={[
-            {
-              required: true,
-              message: 'Please input your username!',
-            },
-          ]}
-        >
-          <Input
-            autoComplete='username'
-          />
-        </Form.Item>
-        <Form.Item
-          label='Password'
-          name='password'
-          rules={[
-            {
-              required: true,
-              message: 'Please input your password!',
-            },
-          ]}
-        >
-          <Input.Password
-            autoComplete='current-password'
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button
-            type='primary'
-            htmlType='submit'
-            style={{ width: '100%' }}
-          >
-            Login
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
-  );
-};
 
 // Separate component for search form (AppContent-specific implementation)
 // Note: This is a simplified version compared to the standalone SearchForm component
@@ -257,6 +171,21 @@ const HomePageContent: React.FC<{
         />
       </div>
     </Space>
+  );
+};
+
+// Wrapper component for LoginPageContent to access location state
+const LoginPageWrapper: React.FC<{
+  theme: AppTheme;
+  handleLogin: (values: { username: string; password: string }, locationState?: RedirectState) => void;
+}> = ({ theme, handleLogin }) => {
+  const location = useLocation();
+  
+  return (
+    <LoginPageContent
+      theme={theme}
+      handleLogin={(values, locationState) => handleLogin(values, locationState || location.state as RedirectState)}
+    />
   );
 };
 
@@ -387,7 +316,7 @@ const AppContent: React.FC<AppContentProps> = ({
                   margin: '2rem auto',
                 }}
               >
-                <LoginPageContent
+                <LoginPageWrapper
                   theme={theme}
                   handleLogin={handleLogin}
                 />
@@ -396,6 +325,29 @@ const AppContent: React.FC<AppContentProps> = ({
           }
           handle={{
             crumb: () => 'Login',
+          }}
+        />
+        <Route
+          path='/register'
+          element={
+            isLoggedIn ? (
+              <Navigate
+                to='/'
+                replace
+              />
+            ) : (
+              <div
+                style={{
+                  maxWidth: '400px',
+                  margin: '2rem auto',
+                }}
+              >
+                <RegistrationPageContent />
+              </div>
+            )
+          }
+          handle={{
+            crumb: () => 'Register',
           }}
         />
       </Routes>

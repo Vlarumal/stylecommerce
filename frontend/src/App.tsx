@@ -13,6 +13,13 @@ import {
 } from './services/authService';
 import './App.css';
 
+interface RedirectState {
+  from?: {
+    pathname: string;
+    search?: string;
+  }
+}
+
 // Ant Design theme configuration
 const theme: ThemeConfig = {
   token: {
@@ -64,7 +71,7 @@ const App: React.FC = () => {
     AnalyticsService.trackEvent('Application Started');
   }, []);
 
-  const handleLogin = async (values: LoginRequest) => {
+  const handleLogin = async (values: LoginRequest, locationState?: RedirectState) => {
     try {
       const credentials: LoginRequest = {
         username: values.username,
@@ -80,7 +87,7 @@ const App: React.FC = () => {
         void navigate(path);
       };
       
-      AuthService.handlePostLoginRedirect(navigateWrapper);
+      AuthService.handlePostLoginRedirect(navigateWrapper, locationState);
     } catch (err) {
       console.error('Login error:', err);
       const errorMessage =
@@ -117,8 +124,8 @@ const App: React.FC = () => {
             <AppContent
               isLoggedIn={isLoggedIn}
               theme={theme}
-              handleLogin={(values) => {
-                void handleLogin(values);
+              handleLogin={(values, locationState) => {
+                void handleLogin(values, locationState);
               }}
             />
           </div>

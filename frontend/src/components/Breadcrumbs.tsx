@@ -22,7 +22,8 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ productName }) => {
     'order-details': 'Order Details',
     'admin': 'Admin',
     'orders': 'Orders',
-    'login': 'Login'
+    'login': 'Login',
+    'register': 'Register'
   };
 
   const breadcrumbItems: BreadcrumbProps['items'] = [];

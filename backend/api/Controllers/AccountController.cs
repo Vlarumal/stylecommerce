@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using StyleCommerce.Api.Models;
 using StyleCommerce.Api.Services;
+using StyleCommerce.Api.Utils;
 
 namespace StyleCommerce.Api.Controllers
 {
@@ -29,17 +30,16 @@ namespace StyleCommerce.Api.Controllers
             var user = await _userService.GetUserByUsernameAsync(model.Username);
             if (user == null)
             {
-                user = new User
-                {
-                    Username = model.Username,
-                    Email = $"{model.Username}@stylecommerce.com",
-                    FirstName = model.Username,
-                    LastName = "User",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    IsActive = true,
-                };
-                user = await _userService.CreateUserAsync(user);
+                return Unauthorized("Invalid username or password");
+            }
+
+            var passwordHasher = new PasswordHasher();
+            if (
+                string.IsNullOrEmpty(user.PasswordHash)
+                || !passwordHasher.VerifyPassword(model.Password, user.PasswordHash)
+            )
+            {
+                return Unauthorized("Invalid username or password");
             }
 
             var additionalClaims = new List<Claim>
@@ -75,6 +75,42 @@ namespace StyleCommerce.Api.Controllers
             Response.Cookies.Append("RefreshToken", refreshToken, refreshCookieOptions);
 
             return Ok(new { Success = true });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        {
+            if (
+                string.IsNullOrEmpty(model.Username)
+                || string.IsNullOrEmpty(model.Password)
+                || string.IsNullOrEmpty(model.Email)
+            )
+            {
+                return BadRequest("Username, password, and email are required");
+            }
+
+            var existingUser = await _userService.GetUserByUsernameAsync(model.Username);
+            if (existingUser != null)
+            {
+                return BadRequest("Username already exists");
+            }
+
+            var passwordHasher = new PasswordHasher();
+            var user = new User
+            {
+                Username = model.Username,
+                Email = model.Email,
+                FirstName = model.FirstName ?? model.Username,
+                LastName = model.LastName ?? "User",
+                PasswordHash = passwordHasher.HashPassword(model.Password),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsActive = true,
+            };
+
+            user = await _userService.CreateUserAsync(user);
+
+            return Ok(new { Success = true, Message = "User registered successfully" });
         }
 
         [HttpPost("refresh-token")]
@@ -183,5 +219,14 @@ namespace StyleCommerce.Api.Controllers
     {
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+    public class RegisterModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
     }
 }

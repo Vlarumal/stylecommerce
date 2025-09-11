@@ -1,8 +1,4 @@
 const API_BASE_URL = `${import.meta.env.VITE_BASE_URL}/api`;
-
-// Constants for session storage keys
-const REDIRECT_URL_KEY = 'auth_redirect_url';
-
 export interface LoginRequest {
   username: string;
   password: string;
@@ -10,6 +6,19 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   success: boolean;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface RefreshTokenResponse {
@@ -23,52 +32,6 @@ export interface CheckAuthResponse {
   role?: string;
 }
 
-interface LocationState {
-  from?: {
-    pathname?: string;
-  };
-}
-
-// Utility functions for redirect URL management
-export const RedirectService = {
-  /**
-   * Save the current URL for post-login redirection
-   * @param url - The URL to save for redirection
-   */
-  saveRedirectUrl: (url: string): void => {
-    // Don't save redirect URL for login page itself
-    if (url && url !== '/login') {
-      sessionStorage.setItem(REDIRECT_URL_KEY, url);
-    }
-  },
-
-  /**
-   * Get the saved redirect URL
-   * @returns The saved URL or null if not found
-   */
-  getRedirectUrl: (): string | null => {
-    const savedUrl = sessionStorage.getItem(REDIRECT_URL_KEY);
-    return savedUrl;
-  },
-
-  /**
-   * Clear the saved redirect URL
-   */
-  clearRedirectUrl: (): void => {
-    sessionStorage.removeItem(REDIRECT_URL_KEY);
-  },
-
-  /**
-   * Get redirect URL with fallback to default
-   * @param defaultUrl - Fallback URL if no redirect URL is saved
-   * @returns URL to redirect to
-   */
-  getRedirectUrlWithFallback: (defaultUrl: string = '/'): string => {
-    const redirectUrl = RedirectService.getRedirectUrl();
-    const result = redirectUrl || defaultUrl;
-    return result;
-  },
-};
 
 export const getCsrfToken = (): string | null => {
   const cookieValue = document.cookie
@@ -83,7 +46,7 @@ export class AuthService {
 
   static async login(
     credentials: LoginRequest
-  ): Promise<LoginResponse> {
+  ): Promise<LoginResponse & { error?: string }> {
     const csrfToken = getCsrfToken();
     const response = await fetch(`${API_BASE_URL}/account/login`, {
       method: 'POST',
@@ -96,6 +59,27 @@ export class AuthService {
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        try {
+          const errorText = await response.text();
+          let errorMessage = 'Invalid username or password';
+          
+          if (errorText) {
+            try {
+              const errorData: unknown = JSON.parse(errorText);
+              errorMessage = typeof errorData === 'string'
+                ? errorData
+                : (errorData as { message?: string }).message || errorMessage;
+            } catch {
+              errorMessage = errorText;
+            }
+          }
+          
+          throw new Error(errorMessage);
+        } catch {
+          throw new Error('Invalid username or password');
+        }
+      }
       throw new Error('Login failed');
     }
 
@@ -107,6 +91,52 @@ export class AuthService {
     return {
       success: data.success,
     };
+  }
+
+  static async register(
+    credentials: RegisterRequest
+  ): Promise<RegisterResponse> {
+    const csrfToken = getCsrfToken();
+    const response = await fetch(`${API_BASE_URL}/account/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-XSRF-TOKEN': csrfToken || '',
+      },
+      body: JSON.stringify(credentials),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      try {
+        const errorText = await response.text();
+        let errorMessage = 'Registration failed';
+        
+        if (errorText) {
+          try {
+            const errorData: unknown = JSON.parse(errorText);
+            errorMessage = typeof errorData === 'string'
+              ? errorData
+              : (errorData as { message?: string }).message || errorMessage;
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+        
+        return {
+          success: false,
+          message: errorMessage
+        };
+      } catch {
+        return {
+          success: false,
+          message: 'Registration failed'
+        };
+      }
+    }
+
+    const data = (await response.json()) as RegisterResponse;
+    return data;
   }
 
   static async refreshToken(): Promise<RefreshTokenResponse> {
@@ -176,67 +206,51 @@ export class AuthService {
 
   /**
    * Handle post-login redirection
-   * Redirects to the saved URL or falls back to the dashboard
+   * Redirects to the original page or falls back to the dashboard
    * @param navigate - The navigate function from React Router
    * @param locationState - The location state from React Router
    */
   static handlePostLoginRedirect(
-    navigate: (path: string) => void,
-    locationState?: LocationState
+    navigate: (path: string, options?: { replace: boolean }) => void,
+    locationState?: {
+      from?: {
+        pathname: string;
+        search?: string;
+      }
+    }
   ): void {
-    const savedRedirectUrl = RedirectService.getRedirectUrl();
-
-    const locationRedirectUrl = locationState?.from?.pathname;
-
-    const validateRedirectUrl = (
-      url: string | null
-    ): string | null => {
-      if (!url) return null;
-
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        console.warn(
-          'External redirect URL blocked for security:',
-          url
-        );
-        return null;
-      }
-
-      if (!url.startsWith('/')) {
-        return '/' + url;
-      }
-
-      return url;
-    };
-
-    const validatedSavedUrl = validateRedirectUrl(savedRedirectUrl);
-    const validatedLocationUrl = validateRedirectUrl(
-      locationRedirectUrl ?? null
-    );
-
     let redirectUrl = '/';
-
-    if (validatedSavedUrl && validatedSavedUrl !== '/login') {
-      redirectUrl = validatedSavedUrl;
-    } else if (
-      validatedLocationUrl &&
-      validatedLocationUrl !== '/login'
-    ) {
-      redirectUrl = validatedLocationUrl;
-    } else {
-      redirectUrl = '/';
+    
+    // Safe path patterns (extend as needed)
+    const safePaths = [
+      '/',
+      '/products',
+      '/categories',
+      '/profile',
+      '/cart',
+      '/checkout',
+      '/order-confirmation',
+      '/order-details',
+      '/order-history',
+      '/admin',
+      '/product'
+    ];
+    
+    if (locationState?.from) {
+      const { pathname, search = '' } = locationState.from;
+      const fullPath = `${pathname}${search}`;
+      
+      const isValidPath = safePaths.some(safePath =>
+        pathname.startsWith(safePath) || pathname === '/'
+      );
+      
+      if (isValidPath) {
+        redirectUrl = fullPath;
+      }
     }
 
-    RedirectService.clearRedirectUrl();
-
-    // Merge guest cart if exists
-    const guestCart = localStorage.getItem('guestCart');
-    if (guestCart) {
-      console.log('Merging guest cart with authenticated cart');
-      // We need to trigger cart merge - this should be handled by CartProvider
-      // The actual merge will be done when the CartContext initializes
-    }
-
-    navigate(redirectUrl);
+    // Navigate with replace:true to prevent back navigation to login
+    navigate(redirectUrl, { replace: true });
   }
 
   static async logout(): Promise<void> {

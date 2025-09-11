@@ -10,8 +10,6 @@ import {
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { RedirectService } from '../services/authService';
-
 import CartIcon from './CartIcon';
 
 const { Header } = Layout;
@@ -122,23 +120,34 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 </Button>
               </>
             ) : (
-              <Button
-                onClick={() => {
-                  RedirectService.saveRedirectUrl(
-                    window.location.pathname +
-                      window.location.search
-                  );
-                  void navigate('/login');
-                }}
-                type='default'
-                style={{
-                  backgroundColor: 'white',
-                  color: theme.token?.colorPrimary,
-                  borderColor: 'white',
-                }}
-              >
-                Login
-              </Button>
+              <>
+                <Button
+                  onClick={() => {
+                    void navigate('/login');
+                  }}
+                  type='default'
+                  style={{
+                    backgroundColor: 'white',
+                    color: theme.token?.colorPrimary,
+                    borderColor: 'white',
+                  }}
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => {
+                    void navigate('/register');
+                  }}
+                  type='default'
+                  style={{
+                    backgroundColor: 'white',
+                    color: theme.token?.colorPrimary,
+                    borderColor: 'white',
+                  }}
+                >
+                  Register
+                </Button>
+              </>
             )}
             <CartIcon />
           </div>

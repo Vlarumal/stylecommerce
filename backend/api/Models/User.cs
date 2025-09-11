@@ -25,6 +25,9 @@ namespace StyleCommerce.Api.Models
         [StringLength(50)]
         public string Role { get; set; } = "User"; // Default role
 
+        [StringLength(100)]
+        public string? PasswordHash { get; set; }
+
         [StringLength(50)]
         public string? PhoneNumber { get; set; }
 
