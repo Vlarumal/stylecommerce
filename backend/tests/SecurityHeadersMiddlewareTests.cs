@@ -47,7 +47,12 @@ namespace StyleCommerce.Api.Tests
             Assert.Contains("style-src 'self' 'unsafe-inline'", csp);
             Assert.Contains("img-src 'self' data: https:", csp);
             Assert.Contains("font-src 'self' data:", csp);
-            Assert.Contains("connect-src 'self' http://localhost:5173", csp);
+            Assert.Contains("'self'", csp);
+            Assert.Contains("https://stylecommerce-7o47.onrender.com", csp);
+            Assert.Contains("https://stylecommerce.onrender.com", csp);
+            Assert.Contains("http://localhost:5173", csp);
+            Assert.Contains("http://localhost:*", csp);
+            Assert.Contains("ws://localhost:*", csp);
             Assert.Contains("frame-ancestors 'none'", csp);
             Assert.Contains("form-action 'self'", csp);
             Assert.Contains("base-uri 'self'", csp);
@@ -80,16 +85,16 @@ namespace StyleCommerce.Api.Tests
             await middleware.InvokeAsync(context);
 
             var csp = context.Response.Headers["Content-Security-Policy"].ToString();
-            Assert.Contains("connect-src 'self' http://localhost:5173 https://localhost:5173", csp);
+            Assert.Contains(
+                "connect-src 'self' http://localhost:5173 https://localhost:5173 https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com http://localhost:* ws://localhost:*",
+                csp
+            );
         }
 
         [Fact]
         public async Task InvokeAsync_WithNoAllowedOrigins_UsesDefault()
         {
-            var securitySettings = new SecuritySettings
-            {
-                AllowedCorsOrigins = new string[0],
-            };
+            var securitySettings = new SecuritySettings { AllowedCorsOrigins = new string[0] };
 
             var options = Options.Create(securitySettings);
             var nextMiddleware = new Mock<RequestDelegate>();
@@ -103,7 +108,10 @@ namespace StyleCommerce.Api.Tests
             await middleware.InvokeAsync(context);
 
             var csp = context.Response.Headers["Content-Security-Policy"].ToString();
-            Assert.Contains("connect-src 'self' http://localhost:5173", csp);
+            Assert.Contains(
+                "connect-src 'self' https://stylecommerce-7o47.onrender.com https://stylecommerce.onrender.com http://localhost:5173 http://localhost:* ws://localhost:*",
+                csp
+            );
         }
     }
 }

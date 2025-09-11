@@ -24,15 +24,22 @@ namespace StyleCommerce.Api.Middleware
                 allowedOrigins.Length > 0
                     ? string.Join(
                         " ",
-                        allowedOrigins,
-                        "https://stylecommerce-7o47.onrender.com",
-                        "https://stylecommerce.onrender.com"
+                        allowedOrigins.Concat(
+                            new[]
+                            {
+                                "https://stylecommerce-7o47.onrender.com",
+                                "https://stylecommerce.onrender.com",
+                            }
+                        )
                     )
                     : string.Join(
                         " ",
-                        "https://stylecommerce-7o47.onrender.com",
-                        "https://stylecommerce.onrender.com",
-                        "http://localhost:5173"
+                        new[]
+                        {
+                            "https://stylecommerce-7o47.onrender.com",
+                            "https://stylecommerce.onrender.com",
+                            "http://localhost:5173",
+                        }
                     );
 
             // Security headers based on best practices
